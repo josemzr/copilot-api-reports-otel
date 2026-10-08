@@ -1,0 +1,52 @@
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  filter/invocations:
+    error_mode: propagate
+    traces:
+      span:
+        - 'attributes["gen_ai.operation.name"] != "invoke_agent"'
+  transform/privacy:
+    error_mode: propagate
+    trace_statements:
+      - keep_keys(resource.attributes, ["service.name", "service.version"])
+      - keep_keys(scope.attributes, [])
+      - keep_keys(span.attributes, ["gen_ai.operation.name", "copilot_chat.mode_name", "github.copilot.agent.type", "gen_ai.request.model", "gen_ai.response.model", "gen_ai.usage.input_tokens", "gen_ai.usage.output_tokens"])
+      - set(span.name, "invoke_agent")
+      - set(span.status.message, "")
+      - set(span.events, nil)
+      - set(span.links, nil)
+exporters:
+  file/raw:
+    path: /data/received.jsonl
+    append: true
+    flush_interval: 100ms
+  file/sanitized:
+    path: /data/sanitized.jsonl
+    append: true
+    flush_interval: 100ms
+service:
+  extensions: [health_check]
+  pipelines:
+    traces/raw:
+      receivers: [otlp]
+      exporters: [file/raw]
+    logs/raw:
+      receivers: [otlp]
+      exporters: [file/raw]
+    metrics/raw:
+      receivers: [otlp]
+      exporters: [file/raw]
+    traces/sanitized:
+      receivers: [otlp]
+      processors: [filter/invocations, transform/privacy]
+      exporters: [file/sanitized]
+  telemetry:
+    logs:
+      level: warn

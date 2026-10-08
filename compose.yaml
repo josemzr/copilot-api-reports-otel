@@ -1,0 +1,23 @@
+name: copilot-api-reports-otel
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.162.0@sha256:39923a8e431bd1f57be82411999d389fcfe40857492e4365456d97a4c1f74be6
+    command: ["--config=/etc/otelcol/config.yaml"]
+    user: "${LOCAL_UID:-501}:${LOCAL_GID:-20}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 64
+    ports:
+      - "127.0.0.1::4318"
+      - "127.0.0.1::13133"
+    volumes:
+      - "./collector.yaml:/etc/otelcol/config.yaml:ro"
+      - "./output:/data"
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: "1"

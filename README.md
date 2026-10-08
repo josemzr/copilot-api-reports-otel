@@ -1,62 +1,61 @@
-# GitHub Copilot API Reports and OpenTelemetry Demo
+# Informes de API y demostración OpenTelemetry de GitHub Copilot
 
-This repository contains a practical demonstration of two complementary
-GitHub Copilot observability workflows:
+Este repositorio contiene una demostración práctica de dos flujos
+complementarios de observabilidad de GitHub Copilot:
 
-1. Exporting enterprise AI credit usage reports through the GitHub REST API.
-2. Receiving GitHub Copilot agent telemetry through an OpenTelemetry
-   Collector and identifying custom agents with `copilot_chat.mode_name`.
+1. Exportar informes empresariales de consumo de AI credits mediante la API
+   REST de GitHub.
+2. Recibir telemetría de agentes de GitHub Copilot mediante un Collector de
+   OpenTelemetry e identificar custom agents con `copilot_chat.mode_name`.
 
-The repository includes separate step-by-step guides for Linux/macOS and
-Windows. The examples use a test enterprise and synthetic custom agents.
+El repositorio incluye guías paso a paso separadas para Linux/macOS y Windows.
+Los ejemplos utilizan una enterprise de pruebas y custom agents sintéticos.
 
-## Contents
+## Contenido
 
-- [`demo-guide.md`](./demo-guide.md): Linux and macOS guide.
-- [`demo-guide-windows.md`](./demo-guide-windows.md): Windows guide.
-- [`compose.yaml`](./compose.yaml): Docker Compose configuration for the
-  OpenTelemetry Collector.
-- [`collector.yaml`](./collector.yaml): OTLP receiver, filtering, privacy
-  transformation, and file exporters.
-- [`workspace/.github/agents/`](./workspace/.github/agents/): synthetic
-  custom agents used by the telemetry demo.
+- [`demo-guide.md`](./demo-guide.md): guía para Linux y macOS.
+- [`demo-guide-windows.md`](./demo-guide-windows.md): guía para Windows.
+- [`compose.yaml`](./compose.yaml): configuración de Docker Compose para el
+  Collector de OpenTelemetry.
+- [`collector.yaml`](./collector.yaml): receptor OTLP, filtrado, transformación
+  de privacidad y exportadores a ficheros.
+- [`workspace/.github/agents/`](./workspace/.github/agents/): custom agents
+  sintéticos utilizados en la demostración de telemetría.
 
-## Requirements
+## Requisitos
 
-- A GitHub enterprise account authorized to request billing reports.
-- A token exposed as `GITHUB_BILLING_TOKEN` with the
-  `manage_billing:enterprise` scope.
-- GitHub Copilot access and an enabled model for the telemetry walkthrough.
-- Visual Studio Code with GitHub Copilot Chat.
-- Docker Desktop or a compatible Docker Engine with Compose.
-- `curl` and `jq` for the billing examples. On Windows, these commands are
-  run from Git Bash; the OpenTelemetry walkthrough uses PowerShell.
+- Una cuenta de GitHub Enterprise autorizada para solicitar informes de
+  facturación.
+- Un token expuesto como `GITHUB_BILLING_TOKEN` con el permiso
+  `manage_billing:enterprise`.
+- Acceso a GitHub Copilot y a un modelo habilitado para la demostración de
+  telemetría.
+- Visual Studio Code con GitHub Copilot Chat.
+- Docker Desktop o un Docker Engine compatible con Compose.
+- `curl` y `jq` para los ejemplos de facturación. En Windows, estos comandos
+  se ejecutan desde Git Bash; la demostración OpenTelemetry utiliza PowerShell.
 
-## Quick start
+## Inicio rápido
 
-Create the local output directory and start the Collector:
+Seleccionar la guía correspondiente al sistema operativo:
 
-```bash
-mkdir -p output
-docker compose up -d
-docker compose port collector 4318
-```
+- **Linux y macOS:** [guía completa](./demo-guide.md).
+- **Windows:** [guía completa](./demo-guide-windows.md).
 
-Compose publishes the OTLP HTTP port on an available loopback port. Use the
-reported port when configuring the Copilot Chat OpenTelemetry endpoint in
-Visual Studio Code.
+Ambas guías incluyen los requisitos, la exportación de informes de facturación,
+el arranque del Collector y la configuración manual de la telemetría de
+GitHub Copilot en Visual Studio Code.
 
-Follow the appropriate guide for the complete billing and telemetry
-walkthrough.
+## Tratamiento de datos
 
-## Data handling
+El Collector escribe:
 
-The Collector writes:
+- `output/received.jsonl`: datos OTLP originales recibidos durante la
+  demostración.
+- `output/sanitized.jsonl`: spans de invocación filtrados que contienen
+  únicamente los atributos necesarios.
 
-- `output/received.jsonl`: raw OTLP data received by the demo.
-- `output/sanitized.jsonl`: filtered invocation spans containing only the
-  attributes required by the walkthrough.
-
-Raw output is enabled only to demonstrate the before/after transformation.
-Review retention, access controls, transport security, and privacy
-requirements before adapting this configuration for production.
+La salida original está habilitada únicamente para demostrar la transformación
+antes/después. Se deben revisar la retención, los controles de acceso, la
+seguridad del transporte y los requisitos de privacidad antes de adaptar esta
+configuración para producción.
